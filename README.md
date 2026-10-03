@@ -1,4 +1,373 @@
-# Ventixe - Event Management & Collegiate MNC Platform
+<div align="center">
+
+# 🎯 NexusEvents — Student Event Discovery Platform
+
+**Discover. Register. Attend. Grow.**
+
+[![Next.js](https://img.shields.io/badge/Next.js-15+-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](LICENSE)
+
+A high-performance **Event Discovery & Aggregation Platform** built specifically for college students to search, explore, and register for hackathons, tech summits, workshops, college fests, and MNC-hosted campus events — all in one place.
+
+[Live Demo](https://github.com/Tejaswini2416/event_organizer) · [Report Bug](https://github.com/Tejaswini2416/event_organizer/issues) · [Request Feature](https://github.com/Tejaswini2416/event_organizer/issues)
+
+</div>
+
+---
+
+## 📋 Table of Contents
+
+- [About the Project](#-about-the-project)
+- [Key Features](#-key-features)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Event Categories](#-event-categories)
+- [Pages & Routes](#-pages--routes)
+- [Supabase Setup](#-supabase-setup)
+- [Getting Started](#-getting-started)
+- [Environment Variables](#-environment-variables)
+- [API Routes](#-api-routes)
+- [Dynamic Event Lifecycle](#-dynamic-event-lifecycle)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## 🚀 About the Project
+
+**NexusEvents** is a student-first event aggregation and discovery engine. It doesn't sell tickets — it **aggregates** event listings from platforms like Unstop, Devpost, GDG, Eventbrite, and college fest portals and redirects students directly to official registration pages.
+
+Key goals:
+- 🔍 **Search & discover** upcoming hackathons, tech events, college fests, and workshops
+- 🎓 **Student-centric UX** with free/paid filters, deadline alerts, and bookmark features
+- ⚡ **Real-time status updates** — events auto-close when registration deadlines pass
+- 🌐 **External redirection** — clicking "Register" goes straight to the official event link
+- 📅 **Add to Calendar** integration (Google Calendar / Apple Calendar)
+
+---
+
+## ✨ Key Features
+
+### 🔍 Discovery Engine
+- Instant search with autocomplete across all events
+- Multi-tag filtering: category, location type, date range, entry fee
+- Grid and List view toggle
+- Pagination and infinite scroll
+
+### 🏷️ Event Status Lifecycle (Automatic)
+
+| Status | Condition |
+|--------|-----------|
+| 🟢 `UPCOMING` | Registration open, event hasn't started |
+| 🔴 `REGISTRATION CLOSED` | Past registration deadline, event not yet started |
+| 🟡 `LIVE` | Event currently in progress |
+| ⚫ `COMPLETED` | Event has ended (archived automatically) |
+| 🚫 `SOLD OUT` | Ticket capacity reached |
+
+### 🎯 Student Utilities
+- **Bookmark events** for later reference (persisted in `localStorage`)
+- **Add to Calendar** — Google Calendar and Apple `.ics` download
+- **Deadline countdown timer** — live ticking countdown on event cards
+- **Registration deadline alerts** with visual badges
+
+### 📡 Real-time Dynamic Sync
+- **Supabase Realtime** channel subscription for instant event updates
+- **15-second background ticker** to auto-close expired registrations
+- **Cron API route** (`/api/cron/sync-events`) for scheduled aggregation
+- Events pushed to Supabase are reflected live without page refresh
+
+### 🏢 Organizer Dashboard (`/organizer`)
+- Metric cards: Upcoming Events, Total Bookings, Tickets Sold, Total Earnings
+- Donut chart: Ticket availability breakdown
+- Bar chart: Monthly revenue vs profit
+- Popular events progress breakdown
+- Interactive calendar with event agenda
+
+### 📱 QR Gate Scanner (`/organizer/scanner`)
+- Simulated webcam viewfinder with laser scanning animation
+- Multi-gate selector
+- Real-time duplicate entry fraud detection
+- Quick simulation test buttons
+
+---
+
+## 🛠️ Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| **Framework** | Next.js 15+ (App Router) |
+| **Language** | TypeScript 5.x |
+| **UI Library** | React 19 |
+| **Styling** | CSS Modules + Global CSS (custom design system) |
+| **Database** | Supabase (PostgreSQL) |
+| **Realtime** | Supabase Realtime Channels |
+| **Auth** | Supabase Auth (JWKS) |
+| **State** | React Context API (`AppContext`) |
+| **Icons** | Lucide React |
+| **QR Codes** | `qrcode.react` (SVG-based) |
+| **Deployment** | Vercel (recommended) |
+
+---
+
+## 📁 Project Structure
+
+```
+event_organizer/
+├── public/
+│   └── events/                    # Event banner images
+│       ├── google-campus.jpg
+│       ├── microsoft-azure.jpg
+│       ├── meta-ai.jpg
+│       ├── nvidia-deeplearning.jpg
+│       ├── tech-summit.jpg
+│       └── ...
+│
+├── src/
+│   ├── app/                       # Next.js App Router pages
+│   │   ├── page.tsx               # Home / Discovery feed
+│   │   ├── layout.tsx             # Root layout with providers
+│   │   ├── globals.css            # Global design tokens & styles
+│   │   ├── events/
+│   │   │   └── [id]/
+│   │   │       └── page.tsx       # Event detail page
+│   │   ├── dashboard/
+│   │   │   └── page.tsx           # Student pass wallet
+│   │   ├── organizer/
+│   │   │   ├── page.tsx           # Organizer analytics dashboard
+│   │   │   ├── create/
+│   │   │   │   └── page.tsx       # Create new event form
+│   │   │   └── scanner/
+│   │   │       └── page.tsx       # QR gate scanner
+│   │   ├── submit-event/
+│   │   │   └── page.tsx           # Community event submission
+│   │   └── api/
+│   │       ├── events/
+│   │       │   ├── search/        # Full-text search endpoint
+│   │       │   └── sync/          # Manual sync trigger
+│   │       ├── cron/
+│   │       │   └── sync-events/   # Scheduled event aggregation
+│   │       └── checkin/           # QR check-in validation
+│   │
+│   ├── components/                # Reusable UI components
+│   │   ├── Navbar.tsx             # Top navigation with category links
+│   │   ├── EventCard.tsx          # Event card (grid + list variants)
+│   │   ├── Footer.tsx             # Site footer
+│   │   ├── TicketCheckoutModal.tsx # Registration / ticket flow
+│   │   └── QRScannerModal.tsx     # QR code scanner modal
+│   │
+│   ├── context/
+│   │   └── AppContext.tsx         # Global state: events, bookmarks, sync
+│   │
+│   ├── lib/
+│   │   ├── mockData.ts            # Seed event data (50+ events)
+│   │   ├── supabase.ts            # Supabase client initialization
+│   │   ├── eventLifecycle.ts      # Status computation helpers
+│   │   └── urlUtils.ts            # External URL resolution per source
+│   │
+│   └── types/
+│       └── index.ts               # TypeScript interfaces & enums
+│
+├── supabase/
+│   └── schema.sql                 # Full DB schema: tables, enums, RLS
+│
+├── .env.local                     # ⚠️ Never commit — see setup below
+├── next.config.ts
+├── tsconfig.json
+└── package.json
+```
+
+---
+
+## 🗂️ Event Categories
+
+| Category | Icon | Examples |
+|----------|------|---------|
+| `HACKATHON` | 💻 | Smart India Hackathon, Electrothon, HackWithInfy |
+| `TECH_EVENT` | 🔬 | Google Cloud Summit, NVIDIA AI Day, AWS Bootcamp |
+| `WORKSHOP` | 🛠️ | DSA Bootcamp, UI/UX Intensive, ML Paper Reading |
+| `COLLEGE_FEST` | 🎓 | Techfest IIT Bombay, Kurukshetra NIT-T, Saarang IIT-M |
+| `WEBINAR` | 🎙️ | Resume Reviews, FAANG Interview Prep, Open Source |
+| `CONFERENCE` | 🏛️ | Grace Hopper, PyCon India, NASSCOM Student Summit |
+| `INTERNSHIP_FAIR` | 💼 | LinkedIn Career Day, Goldman Sachs Campus Connect |
+| `COMPETITION` | 🏆 | Codechef contests, ACM-ICPC regionals |
+
+---
+
+## 📄 Pages & Routes
+
+| Route | Description | Access |
+|-------|-------------|--------|
+| `/` | Home — event discovery feed with search & filters | Public |
+| `/events/[id]` | Event detail page with countdown, tags, register CTA | Public |
+| `/dashboard` | Student pass wallet — bookmarks & QR tickets | Student |
+| `/organizer` | Analytics dashboard — metrics, charts, calendar | Organizer |
+| `/organizer/create` | Create / submit a new event listing | Organizer |
+| `/organizer/scanner` | QR code gate scanner for check-in | Organizer |
+| `/submit-event` | Community crowdsourced event submission form | Public |
+
+---
+
+## 🗄️ Supabase Setup
+
+1. Create a project at [supabase.com](https://supabase.com)
+2. Run the schema in your Supabase SQL editor:
+
+```bash
+# Open supabase/schema.sql and paste its contents into:
+# Supabase Dashboard → SQL Editor → New Query → Run
+```
+
+3. Enable **Realtime** for the `events` table:
+   - Supabase Dashboard → Database → Replication → Toggle `events` table **ON**
+
+4. Configure your environment variables (see below)
+
+---
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18.x or later
+- npm or yarn
+- A Supabase project (free tier works)
+
+### Installation
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/Tejaswini2416/event_organizer.git
+cd event_organizer
+
+# 2. Install dependencies
+npm install
+
+# 3. Set up environment variables
+# Create .env.local and add your Supabase credentials (see below)
+
+# 4. Run the development server
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+---
+
+## 🔐 Environment Variables
+
+Create a `.env.local` file in the root directory. **Never commit this file.**
+
+```env
+# Supabase Project URL (from: Project Settings → API)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
+
+# Supabase Anon/Public Key (safe for browser)
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_publishable_anon_key
+
+# Supabase Service Role Key (server-side only — keep secret!)
+SUPABASE_SERVICE_ROLE_KEY=your_secret_service_role_key
+
+# JWKS URL for auth token verification
+SUPABASE_JWKS_URL=https://your-project-id.supabase.co/auth/v1/.well-known/jwks.json
+```
+
+> 💡 Find your keys at: **Supabase Dashboard → Project Settings → API**
+
+---
+
+## 🔌 API Routes
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/events/search` | `GET` | Full-text search with filters (`?q=`, `?category=`, `?city=`) |
+| `/api/events/sync` | `POST` | Manually trigger event sync from external sources |
+| `/api/cron/sync-events` | `GET` | Cron-triggered aggregation (call via Vercel Cron Jobs) |
+| `/api/checkin` | `POST` | Validate QR ticket and mark attendance |
+
+### Example: Search API
+
+```bash
+GET /api/events/search?q=hackathon&category=HACKATHON&city=Bangalore
+```
+
+```json
+{
+  "events": [...],
+  "total": 12,
+  "page": 1
+}
+```
+
+---
+
+## ⚡ Dynamic Event Lifecycle
+
+Events are automatically managed by `AppContext.tsx`:
+
+```
+┌─────────────┐   deadline passes    ┌──────────────────────┐
+│  UPCOMING   │ ───────────────────▶ │  REGISTRATION CLOSED │
+└─────────────┘                      └──────────────────────┘
+       │                                          │
+  startDate                                  startDate
+  reached                                    reached
+       │                                          │
+       ▼                                          ▼
+┌─────────────┐                      ┌──────────────────────┐
+│    LIVE     │ ── endDate passes ──▶ │      COMPLETED       │
+└─────────────┘                      └──────────────────────┘
+```
+
+- **15-second background ticker** runs in the browser to check deadlines
+- **Supabase Realtime** subscription picks up new events pushed to the DB
+- Completed events are automatically archived and removed from the main feed
+
+---
+
+## 📊 Event Sources Aggregated
+
+| Platform | Event Types | Link |
+|----------|-------------|------|
+| **Unstop** | Hackathons, Competitions, Quizzes | [unstop.com](https://unstop.com) |
+| **Devpost** | Global Hackathons | [devpost.com](https://devpost.com) |
+| **GDG** | Google Developer Events | [gdg.community.dev](https://gdg.community.dev) |
+| **Eventbrite** | Workshops, Conferences | [eventbrite.com](https://eventbrite.com) |
+| **HackerEarth** | Coding Challenges | [hackerearth.com](https://hackerearth.com) |
+| **Dare2Compete** | College Fests, MNCs | [dare2compete.com](https://dare2compete.com) |
+| **LinkedIn Events** | Career Fairs, Webinars | [linkedin.com/events](https://linkedin.com/events) |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Here's how:
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feat/amazing-feature`
+3. Commit your changes: `git commit -m 'feat: add amazing feature'`
+4. Push to the branch: `git push origin feat/amazing-feature`
+5. Open a Pull Request
+
+Please follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages.
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See [`LICENSE`](LICENSE) for more information.
+
+---
+
+<div align="center">
+
+Built with ❤️ for students, by students.
+
+**[⭐ Star this repo](https://github.com/Tejaswini2416/event_organizer)** if you find it useful!
+
+</div>
+
 
 Built with **Next.js 16 (App Router)**, **React 19**, **Tailwind CSS v4**, and **Supabase (PostgreSQL)**.
 

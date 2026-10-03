@@ -353,32 +353,36 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     // Broadcast / Upsert to Supabase if available
     if (supabase) {
-      supabase
-        .from('events')
-        .insert([
-          {
-            title: newEvent.title,
-            slug: newEvent.slug,
-            short_description: newEvent.shortDescription,
-            full_description: newEvent.fullDescription,
-            category: newEvent.category,
-            tags: newEvent.tags,
-            location_type: newEvent.locationType,
-            venue_name: newEvent.venueName,
-            city: newEvent.city,
-            start_date: newEvent.startDate,
-            end_date: newEvent.endDate,
-            registration_deadline: newEvent.registrationDeadline,
-            eligible_majors: newEvent.eligibleMajors,
-            prize_pool: newEvent.prizePool,
-            entry_fee: newEvent.entryFee,
-            organizer_name: newEvent.organizerName,
-            external_apply_url: newEvent.externalApplyUrl,
-            banner_image_url: newEvent.bannerImageUrl,
-          },
-        ])
-        .then(() => {})
-        .catch((err: unknown) => console.warn('Supabase crowdsource submit notice:', err));
+      void (async () => {
+        try {
+          await supabase
+            .from('events')
+            .insert([
+              {
+                title: newEvent.title,
+                slug: newEvent.slug,
+                short_description: newEvent.shortDescription,
+                full_description: newEvent.fullDescription,
+                category: newEvent.category,
+                tags: newEvent.tags,
+                location_type: newEvent.locationType,
+                venue_name: newEvent.venueName,
+                city: newEvent.city,
+                start_date: newEvent.startDate,
+                end_date: newEvent.endDate,
+                registration_deadline: newEvent.registrationDeadline,
+                eligible_majors: newEvent.eligibleMajors,
+                prize_pool: newEvent.prizePool,
+                entry_fee: newEvent.entryFee,
+                organizer_name: newEvent.organizerName,
+                external_apply_url: newEvent.externalApplyUrl,
+                banner_image_url: newEvent.bannerImageUrl,
+              },
+            ]);
+        } catch (err: unknown) {
+          console.warn('Supabase crowdsource submit notice:', err);
+        }
+      })();
     }
 
     setEvents((prev) => [newEvent, ...prev]);
